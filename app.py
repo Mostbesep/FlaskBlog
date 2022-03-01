@@ -7,14 +7,12 @@ from config import Development
 
 
 app = Flask(__name__)
+# from views import index
+
+
 app.config.from_object(Development)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-
-@app.route('/')
-def index():
-    return 'blog home.'
 
 
 
