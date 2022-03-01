@@ -1,4 +1,4 @@
-from flask import session , render_template , request , abort
+from flask import session , render_template , request , abort , flash
 from mod_users.forms import Loginform
 from mod_users.models import User
 from . import admin
@@ -17,9 +17,11 @@ def login():
             abort(400)
         user = User.query.filter(User.email.ilike(f'{form.email.data}')).first() #ilike is a method for compatibility  in databases
         if not user:
-            return 'incorrect credentials' , 400
+            flash('incorrect password or username', category='error')
+            return render_template('admin/login.html', form = form, title = 'admin login')
         if not user.check_password(form.password.data):
-            return 'incorrect credentials' , 400
+            flash('incorrect password or username', category='error')
+            return render_template('admin/login.html', form = form, title = 'admin login')
         session['email'] = user.email
         session['user_id'] = user.id
         return 'Logged in successfully'
