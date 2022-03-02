@@ -9,6 +9,8 @@ class User(db.Model):
     email = Column(String(128), unique=True, nullable=False)
     password = Column(String(128), unique=False, nullable=False)
     role = Column(Integer(), nullable=False, default=0)
+    # if role = 0 => normal user
+    # if role = 1 => admin user
     full_name = Column(String(128), nullable=True, unique=False)
 
     def set_password(self,password):
@@ -17,3 +19,6 @@ class User(db.Model):
 
     def check_password(self,password):
         return check_password_hash(self.password, password)
+
+    def is_admin(self):
+        return self.role == 1
