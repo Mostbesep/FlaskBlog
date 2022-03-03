@@ -1,5 +1,13 @@
+from unicodedata import category
 from app import db
-from sqlalchemy import Column , Integer , String , Text
+from sqlalchemy import Column , Integer , String , Text , Table , ForeignKey
+
+posts_categories = Table('posts_categories', db.metadata,
+    Column('post_id', ForeignKey('posts.id' , ondelete='cascade')),
+    Column('category_id', ForeignKey('categories.id' , ondelete='cascade'))
+    )
+
+
 
 class Category(db.Model):
     __tablename__ = 'categories'
@@ -7,7 +15,7 @@ class Category(db.Model):
     name = Column(String(128), nullable=False, unique=True)
     description = Column(String(256), nullable=True, unique=False)
     slug = Column(String(128), nullable=False, unique=True)
-
+    posts = db.relationship('Post', secondary=posts_categories, back_populates='categories')
 
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -16,5 +24,6 @@ class Post(db.Model):
     summery = Column(String(256), nullable=True, unique=False)
     content = Column(Text, nullable=False, unique=False)
     slug = Column(String(128), nullable=False, unique=True)
+    categories = db.relationship('Category', secondary=posts_categories, back_populates='posts')
 
 
