@@ -44,3 +44,14 @@ def login():
     if session.get('role') == 1:
         return redirect(url_for('admin.index'))
     return render_template('admin/login.html', form = form, title = 'admin login')
+
+
+
+
+@admin.route('/logout', methods=["GET"])
+@admin_only_view
+def logout():
+    session.clear()
+    flash('You logged out successfully.', category='warning')
+    return redirect(url_for('admin.login'))
+
