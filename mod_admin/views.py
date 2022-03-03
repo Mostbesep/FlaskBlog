@@ -55,3 +55,25 @@ def logout():
     flash('You logged out successfully.', category='warning')
     return redirect(url_for('admin.login'))
 
+@admin.route('/posts/new/', methods=['GET','POST'])
+@admin_only_view
+def create_post():
+    form = Createpostform(request.form)
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            return '1'
+        new_post = Post()
+        new_post.title = form.title.data
+        new_post.content = form.content.data
+        new_post.slug = form.slug.data
+        new_post.summary = form.summary.data
+        try:
+            db.session.add(new_post)
+            db.session.commit()
+            flash('Post Created!')
+            return redirect(url_for('admin.index'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Unsuccessful Post', category='error')
+            return render_template('admin/create_post.html', form=form)
+    return render_template('admin/create_post.html', form=form)
