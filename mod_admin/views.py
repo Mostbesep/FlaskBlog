@@ -55,6 +55,45 @@ def logout():
     flash('You logged out successfully.', category='warning')
     return redirect(url_for('admin.login'))
 
+
+@admin.route('/users/', methods=['GET'])
+@admin_only_view
+def list_users():
+    users = User.query.order_by(User.id.desc()).all() #.order_by(User.id.desc()) : ordering by big to small id,option:asc():iverse
+    return render_template('admin/list_users.html', users=users)
+
+
+@admin.route('/users/new/', methods=['GET'])
+@admin_only_view
+def get_create_user():
+    form = Registerform()
+    return render_template('admin/create_user.html', form=form)
+
+
+@admin.route('users/new/', methods=['POST'])
+@admin_only_view
+def post_create_user():
+    form = Registerform(request.form)
+    if not form.validate_on_submit():
+        return render_template('admin/create_user.html', form = form)
+    if not form.password.data == form.confirm_password.data:
+        error_message = 'password and confirm password does not match'
+        form.password.errors.append(error_message)
+        form.confirm_password.errors.append(error_message)
+    old_user = User.query.filter(User.email.ilike(form.email.data)).first()
+    if old_user:
+        flash('email is in use.', category='error')
+        return render_template('admin/create_user.html', form = form)
+    new_user = User()
+    new_user.full_name = form.full_name.data
+    new_user.email = form.email.data
+    new_user.set_password(form.password.data)
+    db.session.add(new_user) 
+    db.session.commit()
+    flash('you created user successfully.', category='success')
+    return redirect(url_for('admin.list_users'))
+
+
 @admin.route('/posts/new/', methods=['GET','POST'])
 @admin_only_view
 def create_post():
