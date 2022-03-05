@@ -1,9 +1,9 @@
 from app import db
 from flask import (abort, flash, redirect, render_template, request, session,
                    url_for)
-from mod_blog.forms import Createpostform
+from mod_blog.forms import Createpostform , Modifypostform
 from mod_blog.models import Post
-from mod_users.forms import Loginform
+from mod_users.forms import Loginform , Registerform
 from mod_users.models import User
 from sqlalchemy.exc import IntegrityError
 
@@ -15,7 +15,6 @@ from .utils import admin_only_view
 @admin_only_view #admin login requirement decorator
 def index():
     return render_template('admin/index.html')
-
 
 
 @admin.route('/login/' , methods=["GET", 'POST'])
@@ -44,8 +43,6 @@ def login():
     if session.get('role') == 1:
         return redirect(url_for('admin.index'))
     return render_template('admin/login.html', form = form, title = 'admin login')
-
-
 
 
 @admin.route('/logout', methods=["GET"])
@@ -116,3 +113,42 @@ def create_post():
             flash('Unsuccessful Post', category='error')
             return render_template('admin/create_post.html', form=form)
     return render_template('admin/create_post.html', form=form)
+
+
+@admin.route('/posts/', methods=['GET'])
+@admin_only_view
+def list_posts():
+    posts = Post.query.order_by(Post.id.desc()).all()
+    return render_template('admin/list_posts.html', posts=posts)
+
+
+@admin.route('posts/delete/<int:post_id>/', methods=['GET'])
+@admin_only_view
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post Deleted')
+    return redirect(url_for('admin.list_posts'))
+
+
+@admin.route('posts/modify/<int:post_id>/', methods=['GET','POST'])
+@admin_only_view
+def modify_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    form = Modifypostform(obj=post)
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            return render_template('admin/modify_post.html', form=form, post=post)
+        post.title = form.title.data
+        post.content = form.content.data
+        post.slug = form.slug.data
+        post.summary = form.summary.data
+        try:
+            db.session.commit()
+            flash('Post Modified!')
+            return redirect(url_for('admin.list_posts'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Unsuccessful Modify Post', category='error')
+    return render_template('admin/modify_post.html', form=form, post=post)
