@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template ,abort
 
 from . import blog
 from .models import Post
@@ -13,5 +13,7 @@ def index():
 
 @blog.route('/<string:slug>')
 def single_post(slug):
-    post = Post.query.filter(Post.slug == slug).first()
-    return post.title
+    post = Post.query.filter(Post.slug == slug).first_or_404() #plan a
+    # if not post:      plan b
+    #     abort(404)
+    return render_template('blog/single_post.html', post=post)
