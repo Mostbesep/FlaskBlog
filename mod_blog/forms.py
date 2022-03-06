@@ -15,3 +15,7 @@ class Categoryform(FlaskForm):
     name = TextField(validators=[DataRequired()])
     slug = TextField(validators=[DataRequired()])
     description = TextAreaField()
+
+
+class SearchForm(FlaskForm):
+    search_query = TextField(validators=[DataRequired()])
