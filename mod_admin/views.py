@@ -1,8 +1,8 @@
 from app import db
 from flask import (abort, flash, redirect, render_template, request, session,
                    url_for)
-from mod_blog.forms import Createpostform , Modifypostform
-from mod_blog.models import Post
+from mod_blog.forms import Createpostform , Modifypostform , Categoryform 
+from mod_blog.models import Post , Category
 from mod_users.forms import Loginform , Registerform
 from mod_users.models import User
 from sqlalchemy.exc import IntegrityError
@@ -152,3 +152,64 @@ def modify_post(post_id):
             db.session.rollback()
             flash('Unsuccessful Modify Post', category='error')
     return render_template('admin/modify_post.html', form=form, post=post)
+
+
+@admin.route('/categories/new/', methods=['GET','POST'])
+@admin_only_view
+def create_category():
+    form = Categoryform(request.form)
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            return '1'
+        new_category = Category()
+        new_category.name = form.name.data
+        new_category.slug = form.slug.data
+        new_category.description = form.description.data
+        try:
+            db.session.add(new_category)
+            db.session.commit()
+            flash('category Created!')
+            return redirect(url_for('admin.list_categories'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Unsuccessful create category', category='error')
+            return render_template('admin/create_category.html', form=form)
+    return render_template('admin/create_category.html', form=form)
+
+
+@admin.route('/categories/', methods=['GET'])
+@admin_only_view
+def list_categories():
+    categories = Category.query.order_by(Category.id.desc()).all()
+    return render_template('admin/list_categories.html', categories=categories)
+
+
+@admin.route('categories/delete/<int:category_id>/', methods=['GET'])
+@admin_only_view
+def delete_category(category_id):
+    category = Category.query.get_or_404(category_id)
+    db.session.delete(category)
+    db.session.commit()
+    flash('Category Deleted')
+    return redirect(url_for('admin.list_categories'))
+
+
+@admin.route('categories/modify/<int:category_id>/', methods=['GET','POST'])
+@admin_only_view
+def modify_category(category_id):
+    category = Category.query.get_or_404(category_id)
+    form = Categoryform(obj=category)
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            return render_template('admin/modify_category.html', form=form, category=category)
+        category.name = form.name.data
+        category.description = form.description.data
+        category.slug = form.slug.data
+        try:
+            db.session.commit()
+            flash('Category Modified!')
+            return redirect(url_for('admin.list_categories'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Unsuccessful Modify Category', category='error')
+    return render_template('admin/modify_category.html', form=form, category=category)

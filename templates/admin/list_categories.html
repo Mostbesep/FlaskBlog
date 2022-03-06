@@ -1,0 +1,28 @@
+{% extends 'admin/base.html' %}
+{% block title %}Category List | Admin Dashboard{% endblock %}
+
+
+
+{% block page_content %}
+<table>
+    <caption>Categories</caption>
+    <thead>
+      <tr>
+        <th>id</th>
+        <th>name</th>
+        <th>description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for category in categories %}
+      <tr>
+        <td data-label="Id">{{ category.id }}</td>
+        <td data-label="name">{{ category.name }}</td>
+        <td data-label="name">{{ category.description }}</td>
+        <td data-label="Actions"><a href="{{ url_for('admin.delete_category', category_id=category.id) }}">Delete category</a> / <a href="{{ url_for('admin.modify_category', category_id=category.id) }}">Modify category</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
