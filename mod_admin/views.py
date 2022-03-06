@@ -1,7 +1,7 @@
 from app import db
 from flask import (abort, flash, redirect, render_template, request, session,
                    url_for)
-from mod_blog.forms import Createpostform , Modifypostform , Categoryform 
+from mod_blog.forms import Postform , Categoryform 
 from mod_blog.models import Post , Category
 from mod_users.forms import Loginform , Registerform
 from mod_users.models import User
@@ -94,7 +94,7 @@ def post_create_user():
 @admin.route('/posts/new/', methods=['GET','POST'])
 @admin_only_view
 def create_post():
-    form = Createpostform(request.form)
+    form = Postform(request.form)
     if request.method == 'POST':
         if not form.validate_on_submit():
             return '1'
@@ -136,7 +136,7 @@ def delete_post(post_id):
 @admin_only_view
 def modify_post(post_id):
     post = Post.query.get_or_404(post_id)
-    form = Modifypostform(obj=post)
+    form = Postform(obj=post)
     if request.method == 'POST':
         if not form.validate_on_submit():
             return render_template('admin/modify_post.html', form=form, post=post)
