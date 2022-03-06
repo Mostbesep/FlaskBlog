@@ -95,14 +95,17 @@ def post_create_user():
 @admin_only_view
 def create_post():
     form = Postform(request.form)
+    categories = Category.query.order_by(Category.id.asc()).all()
+    form.categories.choices = [(category.id, category.name) for category in categories]
     if request.method == 'POST':
         if not form.validate_on_submit():
-            return '1'
+            return 'admini masalan olagh'
         new_post = Post()
         new_post.title = form.title.data
         new_post.content = form.content.data
         new_post.slug = form.slug.data
         new_post.summary = form.summary.data
+        new_post.categories = [Category.query.get(category_id) for category_id in form.categories.data ] # create list of category_id (definded in posts_categories table)
         try:
             db.session.add(new_post)
             db.session.commit()
@@ -137,6 +140,10 @@ def delete_post(post_id):
 def modify_post(post_id):
     post = Post.query.get_or_404(post_id)
     form = Postform(obj=post)
+    categories = Category.query.order_by(Category.id.asc()).all()
+    form.categories.choices = [(category.id, category.name) for category in categories]
+    if request.method != 'POST':
+        form.categories.data = [category.id for category in post.categories] # for selected checkbox categories in post befor modify 
     if request.method == 'POST':
         if not form.validate_on_submit():
             return render_template('admin/modify_post.html', form=form, post=post)
@@ -144,6 +151,7 @@ def modify_post(post_id):
         post.content = form.content.data
         post.slug = form.slug.data
         post.summary = form.summary.data
+        post.categories = [Category.query.get(category_id) for category_id in form.categories.data ]
         try:
             db.session.commit()
             flash('Post Modified!')
