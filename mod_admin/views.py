@@ -6,10 +6,13 @@ from mod_blog.models import Post , Category
 from mod_users.forms import Loginform , Registerform
 from mod_users.models import User
 from sqlalchemy.exc import IntegrityError
+from werkzeug.utils import secure_filename
+import uuid
 
 from . import admin
 from .utils import admin_only_view
-
+from mod_uploads.forms import FileUploadForm
+from mod_uploads.models import File
 
 @admin.route('/')
 @admin_only_view #admin login requirement decorator
@@ -221,3 +224,25 @@ def modify_category(category_id):
             db.session.rollback()
             flash('Unsuccessful Modify Category', category='error')
     return render_template('admin/modify_category.html', form=form, category=category)
+
+
+@admin.route('/library/upload', methods=['GET','POST'])
+@admin_only_view
+def upload_file():
+    form = FileUploadForm() # defult is FileUploadForm(flask.request.form & flask.request.file) in Flaskform
+    if request.method == 'POST':
+        if not form.validate_on_submit():
+            return '1'
+        filename = f'{uuid.uuid1()}_{secure_filename(form.file.data.filename)}'
+        file = File()
+        file.filename = filename
+        try:
+            db.session.add(file)
+            db.session.commit()
+            form.file.data.save(f'static/uploads/{filename}')
+            flash(f'file uploaded on {url_for("static",filename="uploads/"+filename, _external=True )}')
+        except IntegrityError:
+            db.session.rollback()
+            flash('try again')
+    return render_template('/admin/upload_file.html', form=form)
+        

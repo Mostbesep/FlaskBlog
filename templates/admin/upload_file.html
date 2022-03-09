@@ -1,0 +1,15 @@
+{% extends 'admin/base.html' %}
+{% block title %}Create A New Post{% endblock %}
+
+{% block page_content %}
+<h1>Create a new post</h1>
+<form action="{{ url_for('admin.upload_file') }}" method="POST" enctype="multipart/form-data" >
+    {{ form.hidden_tag() }}
+    file: {{ form.file }} <br>
+    <input type="submit" value="Upload">
+
+
+
+
+</form>   
+{% endblock page_content %}
