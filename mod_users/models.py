@@ -1,5 +1,5 @@
 from werkzeug.security import generate_password_hash , check_password_hash
-from sqlalchemy import Column , Integer , String
+from sqlalchemy import Column , Integer , String , Boolean
 from app import db
 
 
@@ -12,6 +12,7 @@ class User(db.Model):
     # if role = 0 => normal user
     # if role = 1 => admin user
     full_name = Column(String(128), nullable=True, unique=False)
+    active = Column(Boolean, nullable=False, unique=False, default=False)
 
     def set_password(self,password):
         self.password = generate_password_hash(password)
