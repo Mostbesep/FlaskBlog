@@ -62,5 +62,5 @@ def confirm_registeration():
     db.session.commit()
     
     delete_from_redis(user,'register')
-    return '1'
+    return 'YOU ARE ACTIVE'
     
