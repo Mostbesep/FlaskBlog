@@ -20,7 +20,7 @@ def delete_from_redis(user,mode):
 
 def send_signup_message(user,token):
     url = {url_for('users.confirm_registeration', email=user.email, token=token, _external=True)}
-    sender = 'mostafa.sep57@gmail.com'
+    sender = '????????@gmail.com'
     recipients = [user.email]
     subject = 'flask blog | Registeration Confirm'
     body = f'Hello,<br>for active your account click: {url} <a href="{url}">here</a>'
