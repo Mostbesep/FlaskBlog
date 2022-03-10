@@ -2,14 +2,18 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import Development
+from flask_mail import Mail
+from mail_info import mail_settings
 
 
 
 
 app = Flask(__name__)
 app.config.from_object(Development)
+app.config.update(mail_settings)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+mail = Mail(app)
 
 from views import index
 
