@@ -1,5 +1,6 @@
 import random
 
+from flask import url_for
 from app import redis, mail
 
 def add_to_redis(user,mode):
@@ -18,9 +19,10 @@ def delete_from_redis(user,mode):
     redis.delete(name)
 
 def send_signup_message(user,token):
+    url = {url_for('users.confirm_registeration', email=user.email, token=token, _external=True)}
     sender = 'mostafa.sep57@gmail.com'
     recipients = [user.email]
     subject = 'flask blog | Registeration Confirm'
-    body = f'Hello,<br>Here is your token: {token}'
+    body = f'Hello,<br>for active your account click: {url} <a href="{url}">here</a>'
     mail.send_message(sender=sender, recipients=recipients, subject=subject, html=body)
     
